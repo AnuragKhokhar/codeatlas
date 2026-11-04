@@ -56,7 +56,7 @@ class OrchestratorTests(unittest.TestCase):
         self.assertEqual(ORCH.cmd_verify_red(red_args), 0)
         self.assertEqual(ORCH.load_state(self.folder)["phase"], "implement")
 
-        (self.folder / "implementation-report.md").write_text("Implementation evidence\n", encoding="utf-8")
+        (self.folder / "frontend-implementation-report.md").write_text("FE implementation evidence\n", encoding="utf-8")\n        (self.folder / "backend-implementation-report.md").write_text("BE implementation evidence\n", encoding="utf-8")
         self.assertEqual(ORCH.cmd_advance(SimpleNamespace(feature=self.feature)), 0)
         self.assertEqual(ORCH.load_state(self.folder)["phase"], "green")
 
