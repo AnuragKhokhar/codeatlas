@@ -1,20 +1,46 @@
 import unittest
 from pathlib import Path
-ROOT=Path(__file__).resolve().parents[2]
+
+ROOT = Path(__file__).resolve().parents[2]
+
+
 class HarnessContractTests(unittest.TestCase):
     def test_required_docs_exist(self):
-        for item in ["AGENTS.md","docs/PRODUCT_REQUIREMENTS.md","docs/ARCHITECTURE.md","docs/ACCEPTANCE_CRITERIA.md","docs/SECURITY_AND_DATA_POLICY.md","docs/SELF_HEALING.md","docs/DEFINITION_OF_DONE.md"]:
-            with self.subTest(item=item): self.assertTrue((ROOT/item).is_file())
+        for item in [
+            "AGENTS.md",
+            "docs/PRODUCT_REQUIREMENTS.md",
+            "docs/ARCHITECTURE.md",
+            "docs/ACCEPTANCE_CRITERIA.md",
+            "docs/SECURITY_AND_DATA_POLICY.md",
+            "docs/SELF_HEALING.md",
+            "docs/DEFINITION_OF_DONE.md",
+            "docs/TDD_WORKFLOW.md",
+            "docs/AGENT_HANDOFF_CONTRACT.md",
+            "docs/ORCHESTRATOR.md",
+        ]:
+            with self.subTest(item=item):
+                self.assertTrue((ROOT / item).is_file())
+
     def test_self_healing_is_bounded(self):
-        text=(ROOT/"docs/SELF_HEALING.md").read_text().lower()
-        self.assertIn("three",text)
-        self.assertIn("never delete",text)
+        text = (ROOT / "docs/SELF_HEALING.md").read_text().lower()
+        self.assertIn("three", text)
+        self.assertIn("never delete", text)
+
     def test_platform_policy_is_explicit(self):
-        text=(ROOT/"docs/SECURITY_AND_DATA_POLICY.md").read_text().lower()
-        self.assertIn("scrape",text); self.assertIn("session cookies",text)
-    def test_skills_and_roles_exist(self):
-        for item in [".agents/skills/plan-task/SKILL.md",".agents/skills/self-heal/SKILL.md",".agents/agents/planner.md",".agents/agents/reviewer.md"]:
-            with self.subTest(item=item): self.assertTrue((ROOT/item).is_file())
+        text = (ROOT / "docs/SECURITY_AND_DATA_POLICY.md").read_text().lower()
+        self.assertIn("scrape", text)
+        self.assertIn("session cookies", text)
+
+    def test_provider_neutral_skills_and_roles_exist(self):
+        for item in [
+            ".agents/skills/plan-task/SKILL.md",
+            ".agents/skills/self-heal/SKILL.md",
+            ".agents/agents/planner.md",
+            ".agents/agents/orchestrator.md",
+            ".agents/agents/reviewer.md",
+        ]:
+            with self.subTest(item=item):
+                self.assertTrue((ROOT / item).is_file())
 
     def test_copilot_agent_profiles_exist(self):
         for item in [
@@ -30,4 +56,7 @@ class HarnessContractTests(unittest.TestCase):
         ]:
             with self.subTest(item=item):
                 self.assertTrue((ROOT / item).is_file())
-\nif __name__=="__main__": unittest.main()
+
+
+if __name__ == "__main__":
+    unittest.main()
