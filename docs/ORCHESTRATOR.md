@@ -1,8 +1,21 @@
 # Executable TDD Orchestrator
 
-The repository includes a local, provider-neutral workflow controller at `tools/orchestrate.py`. It tracks each feature independently, generates the current phase's agent task prompt, stores handoff evidence and prevents phase advancement when required artifacts or test gates are missing.
+CodeAtlas has two cooperating pieces:
 
-## Start a feature
+1. `tools/orchestrate.py` is the provider-neutral local gate controller. It tracks per-feature state, generates phase prompts, stores evidence and blocks progression when artifacts or test gates are missing.
+2. `.github/agents/*.agent.md` contains native GitHub Copilot custom-agent profiles for the Orchestrator and specialist subagents. In supported VS Code/Codespaces Copilot environments, the Orchestrator can delegate work through the Copilot agent tool.
+
+## Enable Copilot subagents in Codespaces
+
+1. Open the repository in GitHub Codespaces.
+2. Open Copilot Chat and switch to Agent mode.
+3. Open Copilot Chat settings and enable **Subagents** if the option is available in your VS Code build.
+4. Select **CodeAtlas Orchestrator** from the custom-agent picker.
+5. Ask: `Implement <feature> using the complete CodeAtlas TDD workflow. Start with the planner and do not skip any gates.`
+
+The repository profiles define the Planner, FE/BE Test Engineers, Test Reviewer, FE/BE Implementers, Documentation Engineer and Independent Reviewer. The Orchestrator delegates to them and uses the local controller as the durable phase ledger. If the IDE/runtime does not expose subagent delegation, use the generated prompts manually; do not claim an agent was spawned.
+
+## Start a feature manually
 
 ```bash
 python tools/orchestrate.py start --feature csv-import
@@ -10,50 +23,33 @@ python tools/orchestrate.py status --feature csv-import
 python tools/orchestrate.py prompt --feature csv-import
 ```
 
-Use the generated prompt with the named agent(s) in your coding assistant. During the test phase, assign the FE and BE test tasks to separate agents, using the same approved plan and API contract. During implementation, assign separate implementers where file ownership permits.
-
 ## Phase gates
 
-1. **Plan:** create `feature-plan.md` and `api-contract.md`.
-2. **Tests:** create `frontend-test-report.md` and `backend-test-report.md`.
-3. **Test review:** create `test-review-report.md` with `Status: APPROVED` in its first five lines.
-4. **RED:** run both test commands before implementation:
+1. **Plan:** `feature-plan.md` and `api-contract.md`.
+2. **Tests:** `frontend-test-report.md` and `backend-test-report.md`.
+3. **Test review:** `test-review-report.md` with `Status: APPROVED` in its first five lines.
+4. **RED:** run both suites before implementation:
    ```bash
    python tools/orchestrate.py verify-red --feature csv-import --frontend-cmd "npm test -- --run" --backend-cmd "pytest -q"
    ```
-   Replace commands with the exact commands selected in the plan. Both must exit non-zero. Inspect the output: a non-zero exit alone does not prove the failures are valid missing-behavior failures; rule out broken test setup.
-5. **Implement:** create `implementation-report.md` after the FE/BE production changes.
-6. **GREEN:** run the exact commands recorded during RED:
-   ```bash
-   python tools/orchestrate.py verify-green --feature csv-import
-   ```
-   Both must exit zero. The controller stores the command output in `green-phase-report.md`.
-7. **Refactor:** create `refactor-report.md` with test evidence.
-8. **Docs:** create `documentation-report.md`.
-9. **Review:** create `review-report.md` with `Status: APPROVED` in its first five lines.
-10. **CI:** create `final-verification.md` with `Status: PASS` in its first five lines.
+   Replace commands with exact commands from the plan. Both must exit non-zero. Inspect output; a non-zero exit alone does not prove valid RED.
+5. **Implement:** `frontend-implementation-report.md` and `backend-implementation-report.md`.
+6. **GREEN:** `python tools/orchestrate.py verify-green --feature csv-import` reruns the exact commands recorded during RED. Both must exit zero.
+7. **Refactor:** `refactor-report.md`.
+8. **Docs:** `documentation-report.md`.
+9. **Review:** `review-report.md` with `Status: APPROVED` in its first five lines.
+10. **CI:** `final-verification.md` with `Status: PASS` in its first five lines.
 
-After ordinary evidence phases, run:
+After ordinary evidence phases, run `python tools/orchestrate.py advance --feature csv-import`. The controller refuses to advance when evidence or approval markers are missing.
 
-```bash
-python tools/orchestrate.py advance --feature csv-import
-```
+## Evidence and command safety
 
-The command refuses to advance if required evidence is absent or an approval status is missing. Use `status` and `prompt` to inspect the current phase and obtain the next task.
+Feature state and reports live under `.artifacts/<feature-slug>/`. `workflow.json` records the current phase, timestamps, test commands and transition history.
 
-## Evidence location
+The controller executes test commands as argument arrays with `shell=False`; it does not evaluate shell pipelines or shell expansions. Use simple commands or checked-in runner scripts. Test output is captured for review. The human/reviewer must still confirm that RED failures represent missing behavior rather than broken test setup.
 
-All per-feature state and reports live under `.artifacts/<feature-slug>/`. The `workflow.json` file records the current phase, timestamps, test commands and transition history. Keep the evidence with the feature branch so reviewers can inspect it.
-
-## What this controller does and does not do
-
-- It enforces ordering, required artifacts, approval markers and actual test command exit codes.
-- It invokes test commands as argument arrays with `shell=False`; it does not evaluate shell pipelines or shell expansions. Keep commands simple, or create a checked-in script and invoke that script.
-- It does not decide whether a failing test is semantically valid RED; a human/test reviewer must inspect the captured output.
-- It does not launch AI subagents itself. Use the generated phase prompt with your IDE's agent/delegation feature. This keeps the controller independent of Copilot, Claude Code or another provider.
-- RED verification requires both FE and BE commands. For a feature with no frontend or backend layer, document the exception and obtain human approval rather than inventing a failing command.
-- It is a local developer tool; CI still runs the repository's independent quality checks.
+RED currently requires both FE and BE commands. If a feature genuinely has only one layer, document the exception and obtain human approval rather than inventing a failing command.
 
 ## Recovery
 
-Do not edit `workflow.json` to skip a gate. Correct the missing artifact or failed test and rerun the relevant command. If evidence must be replaced, inspect it and explicitly remove the old report before rerunning. Follow `docs/SELF_HEALING.md` for bounded repair.
+Do not edit `workflow.json` to skip a gate. Correct missing evidence or failed tests and rerun the relevant command. To replace evidence, inspect it and explicitly remove the old report first. Follow `docs/SELF_HEALING.md` for bounded repair.

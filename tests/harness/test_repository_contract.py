@@ -15,4 +15,19 @@ class HarnessContractTests(unittest.TestCase):
     def test_skills_and_roles_exist(self):
         for item in [".agents/skills/plan-task/SKILL.md",".agents/skills/self-heal/SKILL.md",".agents/agents/planner.md",".agents/agents/reviewer.md"]:
             with self.subTest(item=item): self.assertTrue((ROOT/item).is_file())
-if __name__=="__main__": unittest.main()
+
+    def test_copilot_agent_profiles_exist(self):
+        for item in [
+            ".github/agents/codeatlas-orchestrator.agent.md",
+            ".github/agents/codeatlas-planner.agent.md",
+            ".github/agents/codeatlas-fe-test-engineer.agent.md",
+            ".github/agents/codeatlas-be-test-engineer.agent.md",
+            ".github/agents/codeatlas-test-reviewer.agent.md",
+            ".github/agents/codeatlas-fe-implementer.agent.md",
+            ".github/agents/codeatlas-be-implementer.agent.md",
+            ".github/agents/codeatlas-documentation-engineer.agent.md",
+            ".github/agents/codeatlas-independent-reviewer.agent.md",
+        ]:
+            with self.subTest(item=item):
+                self.assertTrue((ROOT / item).is_file())
+\nif __name__=="__main__": unittest.main()

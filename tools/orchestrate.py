@@ -17,7 +17,7 @@ REQUIRED = {
     "plan": ["feature-plan.md", "api-contract.md"],
     "tests": ["frontend-test-report.md", "backend-test-report.md"],
     "test_review": ["test-review-report.md"],
-    "implement": ["implementation-report.md"],
+    "implement": ["frontend-implementation-report.md", "backend-implementation-report.md"],
     "refactor": ["refactor-report.md"],
     "docs": ["documentation-report.md"],
     "review": ["review-report.md"],
