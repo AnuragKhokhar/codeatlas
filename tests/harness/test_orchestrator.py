@@ -56,11 +56,11 @@ class OrchestratorTests(unittest.TestCase):
         self.assertEqual(ORCH.cmd_verify_red(red_args), 0)
         self.assertEqual(ORCH.load_state(self.folder)["phase"], "implement")
 
-        (self.folder / "frontend-implementation-report.md").write_text("FE implementation evidence\n", encoding="utf-8")\n        (self.folder / "backend-implementation-report.md").write_text("BE implementation evidence\n", encoding="utf-8")
+        (self.folder / "frontend-implementation-report.md").write_text("FE implementation evidence\n", encoding="utf-8")
+        (self.folder / "backend-implementation-report.md").write_text("BE implementation evidence\n", encoding="utf-8")
         self.assertEqual(ORCH.cmd_advance(SimpleNamespace(feature=self.feature)), 0)
         self.assertEqual(ORCH.load_state(self.folder)["phase"], "green")
 
-        # Before the implementation marker exists, GREEN must remain blocked.
         self.assertEqual(ORCH.cmd_verify_green(SimpleNamespace(feature=self.feature)), 2)
         marker.write_text("implemented", encoding="utf-8")
         self.assertEqual(ORCH.cmd_verify_green(SimpleNamespace(feature=self.feature)), 0)
