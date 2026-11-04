@@ -3,16 +3,18 @@
 This is a harness-first student project. Read this file and the relevant requirements, architecture, acceptance criteria and security policy before work.
 
 ## Mandatory gated TDD workflow
-1. **Plan:** Planner maps acceptance criteria to frontend and backend behavior and defines one shared API/interface contract, stack, file ownership and test commands.
-2. **Write tests first:** Frontend Test Engineer and Backend Test Engineer independently write their test suites from the approved criteria and contract. They may work in parallel. They write tests only, not production code.
-3. **Test review:** Test Reviewer checks criteria traceability, contract consistency, meaningful assertions, edge cases and deterministic setup.
-4. **RED:** Run tests before implementation. Record exact commands, exit codes and failure summaries. Confirm failures are due to missing behavior, not broken test setup. If behavior already exists, record it; do not manufacture failure.
-5. **Implement:** Frontend and Backend Implementers work against their reviewed tests and shared contract. They must not edit, delete, skip or weaken tests. Parallel implementation requires clear file ownership.
-6. **GREEN and refactor:** Run focused and integration tests, then refactor while preserving observable behavior and all assertions.
-7. **Document:** Documentation Engineer updates docs from actual code, contract and test evidence.
-8. **Review and CI:** Independent Reviewer checks requirements, tests, implementation, docs and security. CI is the final gate.
+1. **Start the controller:** run `python tools/orchestrate.py start --feature <slug>` for a new feature. Use `status` and `prompt` to obtain the current phase task.
+2. **Plan:** Planner maps acceptance criteria to frontend and backend behavior and defines one shared API/interface contract, stack, file ownership and test commands.
+3. **Write tests first:** Frontend Test Engineer and Backend Test Engineer independently write their test suites from the approved criteria and contract. They may work in parallel. They write tests only, not production code.
+4. **Test review:** Test Reviewer checks criteria traceability, contract consistency, meaningful assertions, edge cases and deterministic setup.
+5. **RED:** run the recorded FE and BE test commands with `verify-red`. Inspect failures to ensure they represent missing behavior, not broken setup.
+6. **Implement:** FE and BE Implementers work against reviewed tests and shared contract. They must not edit, delete, skip or weaken tests.
+7. **GREEN:** run `verify-green` to rerun the exact test commands recorded during RED. Both must pass.
+8. **Refactor:** preserve observable behavior and all assertions.
+9. **Document:** Documentation Engineer updates docs from actual code, contract and test evidence.
+10. **Review and CI:** Independent Reviewer checks requirements, tests, implementation, docs and security. CI is the final gate.
 
-No implementation before reviewed tests and recorded RED evidence. Contract changes return to Planner and test owners before implementation continues.
+Use `advance` only after the current phase's evidence is reviewed. The controller refuses to advance if required files or approval markers are missing. Full usage: [docs/ORCHESTRATOR.md](docs/ORCHESTRATOR.md).
 
 ## Boundaries
 - Test agents write tests/reports only; they do not implement production code.
